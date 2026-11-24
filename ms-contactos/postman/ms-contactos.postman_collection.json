@@ -1,0 +1,225 @@
+{
+  "info": {
+    "name": "Sonido Vivo - ms-contactos (8082)",
+    "description": "Necesita ms-usuarios encendido para el login (el token se pide al puerto 8081).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "token",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Login CLIENTE (guarda el token)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "http://localhost:8081/api/auth/login",
+        "description": "Guarda el accessToken en la variable {{token}} de la colección.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"correo\": \"cliente@correo.cl\",\n  \"clave\": \"Cliente123\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "auth": {
+          "type": "noauth"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "// Guarda el token para usarlo en las demás peticiones de la colección",
+              "if (pm.response.code === 200 || pm.response.code === 201) {",
+              "    pm.collectionVariables.set('token', pm.response.json().accessToken);",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. POST - enviar mensaje (201)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "http://localhost:8082/api/contactos",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nombreCompleto\": \"Tomás Vera\",\n  \"correo\": \"tomas@correo.cl\",\n  \"telefono\": \"+56 9 1234 5678\",\n  \"asunto\": \"stock\",\n  \"mensaje\": \"¿Tienen stock del pedal Boss DS-1?\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "3. POST - datos inválidos (400)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "http://localhost:8082/api/contactos",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nombreCompleto\": \"A\",\n  \"correo\": \"correo-malo\",\n  \"asunto\": \"otro\",\n  \"mensaje\": \"corto\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "4. GET con token de CLIENTE (403)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "http://localhost:8082/api/contactos"
+      }
+    },
+    {
+      "name": "5. Login VENDEDOR (guarda el token)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "http://localhost:8081/api/auth/login",
+        "description": "Guarda el accessToken en la variable {{token}} de la colección.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"correo\": \"vendedor@sonidovivo.cl\",\n  \"clave\": \"Vende123\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "auth": {
+          "type": "noauth"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "// Guarda el token para usarlo en las demás peticiones de la colección",
+              "if (pm.response.code === 200 || pm.response.code === 201) {",
+              "    pm.collectionVariables.set('token', pm.response.json().accessToken);",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. GET - listar mensajes",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "http://localhost:8082/api/contactos"
+      }
+    },
+    {
+      "name": "7. GET - buscar por id",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "http://localhost:8082/api/contactos/1"
+      }
+    },
+    {
+      "name": "8. PUT - marcar como ATENDIDO",
+      "request": {
+        "method": "PUT",
+        "header": [],
+        "url": "http://localhost:8082/api/contactos/1/atendido"
+      }
+    },
+    {
+      "name": "9. DELETE - eliminar mensaje (204)",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": "http://localhost:8082/api/contactos/1"
+      }
+    },
+    {
+      "name": "10. Sin token (401)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "http://localhost:8082/api/contactos",
+        "auth": {
+          "type": "noauth"
+        }
+      }
+    },
+    {
+      "name": "11. POST - enviar mensaje como invitado, sin token (201)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "http://localhost:8082/api/contactos",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nombreCompleto\": \"Tomás Vera\",\n  \"correo\": \"tomas@correo.cl\",\n  \"telefono\": \"+56 9 1234 5678\",\n  \"asunto\": \"stock\",\n  \"mensaje\": \"¿Tienen stock del pedal Boss DS-1?\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "auth": {
+          "type": "noauth"
+        }
+      }
+    }
+  ]
+}

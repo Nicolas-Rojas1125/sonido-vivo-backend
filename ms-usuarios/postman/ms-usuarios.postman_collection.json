@@ -1,0 +1,304 @@
+{
+  "info": {
+    "name": "Sonido Vivo - ms-usuarios (8081)",
+    "description": "Ejecuta primero el login. El token queda en la variable {{token}} y se envía como Bearer en las demás peticiones.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "token",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Login ADMINISTRADOR (guarda el token)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "http://localhost:8081/api/auth/login",
+        "description": "Guarda el accessToken en la variable {{token}} de la colección.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"correo\": \"admin@sonidovivo.cl\",\n  \"clave\": \"Admin123\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "auth": {
+          "type": "noauth"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "// Guarda el token para usarlo en las demás peticiones de la colección",
+              "if (pm.response.code === 200 || pm.response.code === 201) {",
+              "    pm.collectionVariables.set('token', pm.response.json().accessToken);",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Login con clave incorrecta (401)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "http://localhost:8081/api/auth/login",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"correo\": \"admin@sonidovivo.cl\",\n  \"clave\": \"mala\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "auth": {
+          "type": "noauth"
+        }
+      }
+    },
+    {
+      "name": "3. Usuario actual (GET /auth/yo)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "http://localhost:8081/api/auth/yo"
+      }
+    },
+    {
+      "name": "4. Listar usuarios (solo ADMIN)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "http://localhost:8081/api/usuarios"
+      }
+    },
+    {
+      "name": "5. Crear vendedor (201)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "http://localhost:8081/api/usuarios",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"rut\": \"20.111.333-4\",\n  \"nombre\": \"Nuevo Vendedor\",\n  \"correo\": \"nuevo@sonidovivo.cl\",\n  \"clave\": \"Vende2026\",\n  \"rol\": \"VENDEDOR\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "6. Editar usuario 3 (rol)",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "http://localhost:8081/api/usuarios/3",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"rut\": \"9.876.543-3\",\n  \"nombre\": \"Cliente de Prueba\",\n  \"correo\": \"cliente@correo.cl\",\n  \"clave\": \"\",\n  \"rol\": \"CLIENTE\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "7. Desactivar usuario 3",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "http://localhost:8081/api/usuarios/3/estado",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"activo\": false\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "8. Activar usuario 3",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "http://localhost:8081/api/usuarios/3/estado",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"activo\": true\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "9. Renovar token (usa la cookie sv_refresh)",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": "http://localhost:8081/api/auth/refresh",
+        "description": "Postman guarda la cookie del login. El refresh token se rota en cada uso.",
+        "auth": {
+          "type": "noauth"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "// Guarda el token para usarlo en las demás peticiones de la colección",
+              "if (pm.response.code === 200 || pm.response.code === 201) {",
+              "    pm.collectionVariables.set('token', pm.response.json().accessToken);",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "10. Registro público de cliente (201)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "http://localhost:8081/api/auth/registro",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"rut\": \"7.654.321-6\",\n  \"nombre\": \"Nueva Clienta\",\n  \"correo\": \"nueva@correo.cl\",\n  \"clave\": \"Clave123\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "auth": {
+          "type": "noauth"
+        }
+      }
+    },
+    {
+      "name": "11. Login CLIENTE (guarda el token)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "http://localhost:8081/api/auth/login",
+        "description": "Guarda el accessToken en la variable {{token}} de la colección.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"correo\": \"cliente@correo.cl\",\n  \"clave\": \"Cliente123\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "auth": {
+          "type": "noauth"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "// Guarda el token para usarlo en las demás peticiones de la colección",
+              "if (pm.response.code === 200 || pm.response.code === 201) {",
+              "    pm.collectionVariables.set('token', pm.response.json().accessToken);",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "12. Listar usuarios con token de CLIENTE (403)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "http://localhost:8081/api/usuarios"
+      }
+    },
+    {
+      "name": "13. Cerrar sesión (204)",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": "http://localhost:8081/api/auth/logout",
+        "auth": {
+          "type": "noauth"
+        }
+      }
+    }
+  ]
+}
